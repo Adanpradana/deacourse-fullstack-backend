@@ -3,11 +3,10 @@ const data = require("../connection/connection");
 const users = data.define(
   "deacourse",
   {
-    id: {
-      type: Sequelize.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
+    nip: {
+      type: Sequelize.STRING,
       allowNull: false,
+      unique: true,
     },
     user_name: {
       type: Sequelize.STRING,
@@ -19,10 +18,19 @@ const users = data.define(
       allowNull: false,
       unique: true,
     },
+    password: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    newPassword: {
+      type: Sequelize.STRING,
+      allowNull: true,
+      unique: true,
+    },
   },
   {
     freezeTableName: true,
-    timestamps: false,
   }
 );
 

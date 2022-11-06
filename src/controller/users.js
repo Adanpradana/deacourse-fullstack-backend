@@ -1,4 +1,6 @@
+const data = require("../connection/connection");
 const users = require("../model/users");
+const bcrypt = require("bcrypt");
 
 const getUsers = async (req, res) => {
   try {
@@ -12,12 +14,14 @@ const getUsers = async (req, res) => {
 };
 
 const createUsers = async (req, res) => {
-  const { id, user_name, email } = req.body;
+  const { nip, user_name, email, password } = req.body;
+  const encryptPassword = await bcrypt.hash(password, 12);
   try {
     const result = await users.create({
-      id,
+      nip,
       user_name,
       email,
+      password: encryptPassword,
     });
     res.status(200).json({ message: "success create users", data: result });
   } catch (error) {
@@ -25,26 +29,33 @@ const createUsers = async (req, res) => {
   }
 };
 const editUsers = async (req, res) => {
-  const { id, user_name, email } = req.body;
-  try {
-    const result = await users.update(
+  const { nip, user_name, email, password, newPassword } = req.body;
+  const usersData = await users.findOne({
+    where: {
+      nip,
+    },
+  });
+  const compare = await bcrypt.compare(password, usersData.password);
+  const encryptPassword = await bcrypt.hash(newPassword, 12);
+  if (compare) {
+    const user = await users.update(
       {
-        id,
         user_name,
         email,
+        password: encryptPassword,
       },
       {
         where: {
-          id,
+          nip,
         },
       }
     );
-    res.status(200).json({ message: "success create users", data: result });
-  } catch (error) {
-    res.status(404).json({ message: error.message });
+    res.json({ message: "success update data!" });
+  } else {
+    res.status(400).json({ message: "wrong password!" });
   }
 };
-
+data.sync();
 module.exports = {
   getUsers,
   createUsers,

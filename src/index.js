@@ -10,6 +10,6 @@ app.use(bodyParser.json());
 
 router.get("/", getUsers);
 router.post("/", createUsers);
-router.put("/:id", editUsers);
+router.put("/", editUsers);
 app.use(router);
 app.listen(port, () => console.log(`server running in port ${port}`));
