@@ -55,9 +55,22 @@ const editUsers = async (req, res) => {
     res.status(400).json({ message: "wrong password!" });
   }
 };
+
+const login = async (req, res) => {
+  const { nip, password } = req.body;
+  const result = await users.findOne({
+    where: {
+      nip,
+    },
+  });
+  const compare = await bcrypt.compare(password, result.password);
+  compare ? res.status(200).json({ message: "login success", result }) : res.status(400).json({ message: "credential error" });
+};
+
 data.sync();
 module.exports = {
   getUsers,
   createUsers,
   editUsers,
+  login,
 };
