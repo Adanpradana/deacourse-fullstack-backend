@@ -1,7 +1,7 @@
 const data = require("../connection/connection");
 const users = require("../model/users");
 const bcrypt = require("bcrypt");
-
+const bcryptCheck = require("../../utils/bcrypt");
 const getUsers = async (req, res) => {
   try {
     const result = await users.findAll();
@@ -30,12 +30,7 @@ const createUsers = async (req, res) => {
 };
 const editUsers = async (req, res) => {
   const { nip, user_name, email, password, newPassword } = req.body;
-  const usersData = await users.findOne({
-    where: {
-      nip,
-    },
-  });
-  const compare = await bcrypt.compare(password, usersData.password);
+  const compare = await bcryptCheck(nip, password);
   const encryptPassword = await bcrypt.hash(newPassword, 12);
   if (compare) {
     const user = await users.update(
@@ -58,13 +53,12 @@ const editUsers = async (req, res) => {
 
 const login = async (req, res) => {
   const { nip, password } = req.body;
-  const result = await users.findOne({
-    where: {
-      nip,
-    },
-  });
-  const compare = await bcrypt.compare(password, result.password);
-  compare ? res.status(200).json({ message: "login success", result }) : res.status(400).json({ message: "credential error" });
+  try {
+    const compare = await bcryptCheck(nip, password);
+    compare.bcryptCompare ? res.status(200).json({ message: "login success" }) : res.status(400).json({ message: "credential error" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 data.sync();
